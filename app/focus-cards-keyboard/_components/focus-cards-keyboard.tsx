@@ -15,16 +15,16 @@ export const Card = React.memo(
     currentStep: number;
   }) => (
     <motion.div
-      initial={{ 
-        x: -200
+      initial={{
+        x: -200,
       }}
-      animate={{ 
-        x: 0
+      animate={{
+        x: 0,
       }}
-      transition={{ 
-        duration: 0.3, 
+      transition={{
+        duration: 0.3,
         delay: index * 0.1,
-        ease: "easeOut"
+        ease: "easeOut",
       }}
       className={cn(
         "rounded-lg relative bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden h-60 md:h-80 w-full transition-all duration-500 ease-out flex flex-col items-center justify-center p-6 text-center border border-neutral-300 dark:border-neutral-600",
@@ -32,16 +32,16 @@ export const Card = React.memo(
       )}
     >
       <motion.div
-        initial={{ 
-          opacity: 0 
+        initial={{
+          opacity: 0,
         }}
-        animate={{ 
-          opacity: 1 
+        animate={{
+          opacity: 1,
         }}
-        transition={{ 
-          duration: 0.4, 
+        transition={{
+          duration: 0.4,
           delay: index * 0.1 + 0.1,
-          ease: "easeOut"
+          ease: "easeOut",
         }}
         className={cn(
           "transition-all duration-500 ease-out",
