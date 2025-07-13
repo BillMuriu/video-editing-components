@@ -49,14 +49,10 @@ const InThisVideo = () => {
     <motion.div
       ref={containerRef}
       initial={{ scale: 1, y: 0 }}
-      animate={
-        zoomed
-          ? { scale: ZOOM_SCALE, y: centerY }
-          : { scale: 1, y: 0 }
-      }
+      animate={zoomed ? { scale: ZOOM_SCALE, y: centerY } : { scale: 1, y: 0 }}
       transition={{ duration: 1.1, ease: "easeInOut" }}
       className="min-h-screen p-2 md:p-4 flex items-center justify-center overflow-hidden"
-      style={{ zIndex: 10, background: '#fff' }}
+      style={{ zIndex: 10, background: "#fff" }}
     >
       <div className="max-w-3xl w-full mx-auto space-y-3">
         {/* LAYER 1: VIDEO SECTION - Slides in first and fastest */}
