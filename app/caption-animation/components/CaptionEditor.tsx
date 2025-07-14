@@ -10,19 +10,31 @@ export const CaptionEditor = () => {
     setLines,
     setCurrentLine,
     animationTypes,
+    fontFamilies,
+    fontWeights,
+    textDecorations,
+    textTransforms,
     setWordAnimation,
     setWordDuration,
     setWordEffect,
     setWordEffectOptions,
+    setWordFontSize,
+    setWordFontFamily,
+    setWordFontWeight,
+    setWordTextDecoration,
+    setWordTextTransform,
+    setWordLetterSpacing,
+    setWordTextColor,
     background,
     setBackground,
     previewDimensions,
     setPreviewDimensions,
+    setWordSpaceAfter,
   } = useCaptionStore();
 
   const [input, setInput] = useState(lines.map((l) => l.text).join("\n"));
 
-  // Update lines from textarea
+  // Updated handleInputChange function:
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
@@ -31,21 +43,28 @@ export const CaptionEditor = () => {
       split.map((text, idx) => ({
         text,
         words: text.split(/\s+/).map((w, widx) => {
-          const prevAnim = lines[idx]?.words?.[widx]?.animation;
-          const prevDuration = lines[idx]?.words?.[widx]?.duration;
-          const prevEffect = lines[idx]?.words?.[widx]?.effect;
-          const prevEffectOptions = lines[idx]?.words?.[widx]?.effectOptions;
-          const wordObj: any = { text: w };
-          if (prevAnim) wordObj.animation = prevAnim;
-          if (prevDuration !== undefined) wordObj.duration = prevDuration;
-          if (prevEffect) wordObj.effect = prevEffect;
-          if (prevEffectOptions) wordObj.effectOptions = prevEffectOptions;
+          const prevWord = lines[idx]?.words?.[widx];
+          const wordObj: any = {
+            text: w,
+            // Preserve existing properties or use defaults
+            animation: prevWord?.animation,
+            duration: prevWord?.duration ?? 0.5,
+            effect: prevWord?.effect ?? "none",
+            effectOptions: prevWord?.effectOptions,
+            fontSize: prevWord?.fontSize ?? 48,
+            fontFamily: prevWord?.fontFamily ?? "Inter",
+            fontWeight: prevWord?.fontWeight ?? "700",
+            textDecoration: prevWord?.textDecoration ?? "none",
+            textTransform: prevWord?.textTransform ?? "none",
+            letterSpacing: prevWord?.letterSpacing ?? 0,
+            textColor: prevWord?.textColor ?? "#1f2937",
+            spaceAfter: prevWord?.spaceAfter ?? 8, // Preserve spacing
+          };
           return wordObj;
         }),
       }))
     );
   };
-
   return (
     <div>
       <h2 className="font-bold mb-2">Preview Dimensions</h2>
@@ -113,9 +132,9 @@ export const CaptionEditor = () => {
           disabled={previewDimensions.aspect !== "custom"}
         />
       </div>
+
       <h2 className="font-bold mb-2">Background</h2>
       <div className="mb-4 flex flex-wrap items-center gap-2 p-2 border rounded bg-gray-50">
-        {/* ...existing background controls... */}
         <label className="font-semibold mr-2">Type:</label>
         <select
           value={background.type}
@@ -129,10 +148,9 @@ export const CaptionEditor = () => {
           <option value="dots">Dots</option>
           <option value="gradient">Gradient</option>
         </select>
-        {/* ...existing background options... */}
+
         {background.type === "grid" && (
           <>
-            {/* ...grid options... */}
             <label className="ml-2 text-xs">Color:</label>
             <input
               type="color"
@@ -163,9 +181,9 @@ export const CaptionEditor = () => {
             />
           </>
         )}
+
         {background.type === "dots" && (
           <>
-            {/* ...dots options... */}
             <label className="ml-2 text-xs">Dot Color:</label>
             <input
               type="color"
@@ -213,9 +231,9 @@ export const CaptionEditor = () => {
             />
           </>
         )}
+
         {background.type === "gradient" && (
           <>
-            {/* ...gradient options... */}
             <label className="ml-2 text-xs">From:</label>
             <input
               type="color"
@@ -272,6 +290,7 @@ export const CaptionEditor = () => {
           </>
         )}
       </div>
+
       <h2 className="font-bold mb-2">Caption Lines</h2>
       <textarea
         className="w-full border rounded p-2 mb-4"
@@ -280,120 +299,254 @@ export const CaptionEditor = () => {
         onChange={handleInputChange}
         placeholder="Enter one caption line per row"
       />
-      <h3 className="font-semibold mb-2">Word Animations</h3>
+
+      <h3 className="font-semibold mb-2">Word Controls</h3>
       <ScrollArea className="h-96 w-full rounded-md border bg-white">
         <div className="p-2">
           {lines.map((line, idx) => (
-            <div key={idx} className="mb-4 p-2 border rounded bg-gray-100">
-              <div className="mb-1 font-mono">{line.text}</div>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <div key={idx} className="mb-4 p-3 border rounded bg-gray-100">
+              <div className="mb-2 font-mono text-sm">{line.text}</div>
+              <div className="mt-2 flex flex-wrap gap-3">
                 {line.words?.map((word, widx) => (
-                  <span
+                  <div
                     key={widx}
-                    className="inline-flex items-center gap-1 bg-white border rounded px-2 py-1"
+                    className="bg-white border rounded p-2 min-w-[200px]"
                   >
-                    <span>{word.text}</span>
-                    <select
-                      value={word.animation}
-                      onChange={(e) =>
-                        setWordAnimation(idx, widx, e.target.value)
-                      }
-                      className="text-xs"
-                    >
-                      {animationTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      min={0.01}
-                      step={0.01}
-                      value={word.duration ?? ""}
-                      onChange={(e) =>
-                        setWordDuration(idx, widx, Number(e.target.value))
-                      }
-                      className="w-14 text-xs border rounded px-1 ml-1"
-                      placeholder="s"
-                      title="Duration (seconds)"
-                    />
-                    <select
-                      value={word.effect || "none"}
-                      onChange={(e) => setWordEffect(idx, widx, e.target.value)}
-                      className="text-xs ml-1"
-                      title="Effect"
-                    >
-                      <option value="none">No Effect</option>
-                      <option value="bold">Bold</option>
-                      <option value="italic">Italic</option>
-                      <option value="gradient">Gradient</option>
-                    </select>
-                    {/* Gradient effect options panel */}
-                    {word.effect === "gradient" && (
-                      <span className="flex items-center gap-1 ml-1">
-                        <select
-                          value={word.effectOptions?.type || "linear"}
-                          onChange={(e) =>
-                            setWordEffectOptions(idx, widx, {
-                              ...word.effectOptions,
-                              type: e.target.value,
-                            })
-                          }
-                          className="text-xs"
-                          title="Gradient Type"
-                        >
-                          <option value="linear">Linear</option>
-                          <option value="radial">Radial</option>
-                        </select>
-                        <input
-                          type="color"
-                          value={word.effectOptions?.from || "#ff0080"}
-                          onChange={(e) =>
-                            setWordEffectOptions(idx, widx, {
-                              ...word.effectOptions,
-                              from: e.target.value,
-                            })
-                          }
-                          title="From Color"
-                        />
-                        <input
-                          type="color"
-                          value={word.effectOptions?.to || "#7928ca"}
-                          onChange={(e) =>
-                            setWordEffectOptions(idx, widx, {
-                              ...word.effectOptions,
-                              to: e.target.value,
-                            })
-                          }
-                          title="To Color"
-                        />
-                        {(!word.effectOptions?.type ||
-                          word.effectOptions?.type === "linear") && (
-                          <input
-                            type="number"
-                            min={0}
-                            max={360}
-                            step={1}
-                            value={word.effectOptions?.angle ?? 90}
+                    {/* Word Header */}
+                    <div className="font-medium text-sm mb-2 text-gray-700">
+                      "{word.text}"
+                    </div>
+
+                    {/* Row 1: Animation Controls */}
+                    <div className="flex flex-wrap items-center gap-1 mb-2">
+                      <select
+                        value={word.animation}
+                        onChange={(e) =>
+                          setWordAnimation(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Animation"
+                      >
+                        {animationTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="number"
+                        min={0.01}
+                        step={0.01}
+                        value={word.duration ?? ""}
+                        onChange={(e) =>
+                          setWordDuration(idx, widx, Number(e.target.value))
+                        }
+                        className="w-12 text-xs border rounded px-1"
+                        placeholder="s"
+                        title="Duration (seconds)"
+                      />
+
+                      <select
+                        value={word.effect || "none"}
+                        onChange={(e) =>
+                          setWordEffect(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Effect"
+                      >
+                        <option value="none">No Effect</option>
+                        <option value="bold">Bold</option>
+                        <option value="italic">Italic</option>
+                        <option value="gradient">Gradient</option>
+                      </select>
+
+                      {/* Gradient effect options */}
+                      {word.effect === "gradient" && (
+                        <div className="flex items-center gap-1">
+                          <select
+                            value={word.effectOptions?.type || "linear"}
                             onChange={(e) =>
                               setWordEffectOptions(idx, widx, {
                                 ...word.effectOptions,
-                                angle: Number(e.target.value),
+                                type: e.target.value,
                               })
                             }
-                            className="w-12 text-xs border rounded px-1"
-                            placeholder="Angle"
-                            title="Angle (deg)"
+                            className="text-xs border rounded px-1"
+                            title="Gradient Type"
+                          >
+                            <option value="linear">Linear</option>
+                            <option value="radial">Radial</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={word.effectOptions?.from || "#ff0080"}
+                            onChange={(e) =>
+                              setWordEffectOptions(idx, widx, {
+                                ...word.effectOptions,
+                                from: e.target.value,
+                              })
+                            }
+                            className="w-6 h-6"
+                            title="From Color"
                           />
-                        )}
-                      </span>
-                    )}
-                  </span>
+                          <input
+                            type="color"
+                            value={word.effectOptions?.to || "#7928ca"}
+                            onChange={(e) =>
+                              setWordEffectOptions(idx, widx, {
+                                ...word.effectOptions,
+                                to: e.target.value,
+                              })
+                            }
+                            className="w-6 h-6"
+                            title="To Color"
+                          />
+
+                          {(!word.effectOptions?.type ||
+                            word.effectOptions?.type === "linear") && (
+                            <input
+                              type="number"
+                              min={0}
+                              max={360}
+                              step={1}
+                              value={word.effectOptions?.angle ?? 90}
+                              onChange={(e) =>
+                                setWordEffectOptions(idx, widx, {
+                                  ...word.effectOptions,
+                                  angle: Number(e.target.value),
+                                })
+                              }
+                              className="w-12 text-xs border rounded px-1"
+                              placeholder="Angle"
+                              title="Angle (deg)"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Row 2: Typography Controls */}
+                    <div className="flex flex-wrap items-center gap-1">
+                      <input
+                        type="number"
+                        min={12}
+                        max={120}
+                        value={word.fontSize ?? 48}
+                        onChange={(e) =>
+                          setWordFontSize(idx, widx, Number(e.target.value))
+                        }
+                        className="w-12 text-xs border rounded px-1"
+                        title="Font Size (px)"
+                      />
+
+                      <select
+                        value={word.fontFamily ?? "Inter"}
+                        onChange={(e) =>
+                          setWordFontFamily(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Font Family"
+                      >
+                        {fontFamilies.map((family) => (
+                          <option key={family} value={family}>
+                            {family}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={word.fontWeight ?? "700"}
+                        onChange={(e) =>
+                          setWordFontWeight(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Font Weight"
+                      >
+                        {fontWeights.map((weight) => (
+                          <option key={weight} value={weight}>
+                            {weight}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={word.textDecoration ?? "none"}
+                        onChange={(e) =>
+                          setWordTextDecoration(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Text Decoration"
+                      >
+                        {textDecorations.map((decoration) => (
+                          <option key={decoration} value={decoration}>
+                            {decoration}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={word.textTransform ?? "none"}
+                        onChange={(e) =>
+                          setWordTextTransform(idx, widx, e.target.value)
+                        }
+                        className="text-xs border rounded px-1"
+                        title="Text Transform"
+                      >
+                        {textTransforms.map((transform) => (
+                          <option key={transform} value={transform}>
+                            {transform}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="number"
+                        min={-2}
+                        max={10}
+                        step={0.1}
+                        value={word.letterSpacing ?? 0}
+                        onChange={(e) =>
+                          setWordLetterSpacing(
+                            idx,
+                            widx,
+                            Number(e.target.value)
+                          )
+                        }
+                        className="w-12 text-xs border rounded px-1"
+                        title="Letter Spacing (px)"
+                      />
+
+                      <input
+                        type="color"
+                        value={word.textColor ?? "#1f2937"}
+                        onChange={(e) =>
+                          setWordTextColor(idx, widx, e.target.value)
+                        }
+                        className="w-6 h-6"
+                        title="Text Color"
+                      />
+
+                      {/* ADD THE SPACING CONTROL HERE */}
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        step={1}
+                        value={word.spaceAfter ?? 8}
+                        onChange={(e) =>
+                          setWordSpaceAfter(idx, widx, Number(e.target.value))
+                        }
+                        className="w-12 text-xs border rounded px-1"
+                        title="Space After (px)"
+                        placeholder="Space"
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
               <button
-                className="mt-2 px-2 py-1 bg-blue-500 text-white rounded"
+                className="mt-2 px-2 py-1 bg-blue-500 text-white rounded text-xs"
                 onClick={() => setCurrentLine(idx)}
               >
                 Preview

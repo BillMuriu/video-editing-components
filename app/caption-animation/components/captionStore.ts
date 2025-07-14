@@ -14,6 +14,14 @@ export type CaptionWord = {
   duration?: number;
   effect?: string;
   effectOptions?: EffectOptions;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  textDecoration?: string;
+  textTransform?: string;
+  letterSpacing?: number;
+  textColor?: string;
+  spaceAfter?: number; // Space after this word in pixels
 };
 
 export type CaptionLine = {
@@ -51,6 +59,10 @@ interface CaptionState {
   lines: CaptionLine[];
   currentLine: number;
   animationTypes: string[];
+  fontFamilies: string[];
+  fontWeights: string[];
+  textDecorations: string[];
+  textTransforms: string[];
   background: BackgroundSettings;
   previewDimensions: PreviewDimensions;
   setPreviewDimensions: (dims: PreviewDimensions) => void;
@@ -69,12 +81,55 @@ interface CaptionState {
     wordIdx: number,
     options: EffectOptions
   ) => void;
+  setWordFontSize: (lineIdx: number, wordIdx: number, fontSize: number) => void;
+  setWordFontFamily: (
+    lineIdx: number,
+    wordIdx: number,
+    fontFamily: string
+  ) => void;
+  setWordFontWeight: (
+    lineIdx: number,
+    wordIdx: number,
+    fontWeight: string
+  ) => void;
+  setWordTextDecoration: (
+    lineIdx: number,
+    wordIdx: number,
+    textDecoration: string
+  ) => void;
+  setWordTextTransform: (
+    lineIdx: number,
+    wordIdx: number,
+    textTransform: string
+  ) => void;
+  setWordLetterSpacing: (
+    lineIdx: number,
+    wordIdx: number,
+    letterSpacing: number
+  ) => void;
+  setWordTextColor: (
+    lineIdx: number,
+    wordIdx: number,
+    textColor: string
+  ) => void;
+  setWordSpaceAfter: (
+    lineIdx: number,
+    wordIdx: number,
+    spaceAfter: number
+  ) => void;
 }
 
 function splitWords(text: string): CaptionWord[] {
-  return text
-    .split(/\s+/)
-    .map((w) => ({ text: w, duration: 0.5, effect: "none" }));
+  return text.split(/\s+/).map((w) => ({
+    text: w,
+    duration: 0.5,
+    effect: "none",
+    fontSize: 48,
+    fontFamily: "Inter",
+    fontWeight: "700",
+    textColor: "#1f2937",
+    spaceAfter: 8, // Default 8px space after each word
+  }));
 }
 
 export const useCaptionStore = create<CaptionState>(
@@ -92,13 +147,39 @@ export const useCaptionStore = create<CaptionState>(
       ],
       currentLine: 0,
       animationTypes: ["fade", "slide", "bounce"],
+      fontFamilies: [
+        "Inter",
+        "Arial",
+        "Helvetica",
+        "Times New Roman",
+        "Georgia",
+        "Verdana",
+        "Tahoma",
+        "Trebuchet MS",
+        "Impact",
+        "Comic Sans MS",
+        "Courier New",
+        "Lucida Console",
+      ],
+      fontWeights: [
+        "100",
+        "200",
+        "300",
+        "400",
+        "500",
+        "600",
+        "700",
+        "800",
+        "900",
+      ],
+      textDecorations: ["none", "underline", "line-through", "overline"],
+      textTransforms: ["none", "uppercase", "lowercase", "capitalize"],
       background: { type: "none", options: {} },
       previewDimensions: { aspect: "16:9", width: 1280, height: 720 },
       setPreviewDimensions: (dims) => set({ previewDimensions: dims }),
       setBackground: (bg) => set({ background: bg }),
       setLines: (lines) => set({ lines }),
       setCurrentLine: (idx) => set({ currentLine: idx }),
-      // No line-level animation/duration/exit
       setWordAnimation: (lineIdx, wordIdx, animation) =>
         set((state) => {
           const lines = [...state.lines];
@@ -131,9 +212,73 @@ export const useCaptionStore = create<CaptionState>(
           lines[lineIdx] = { ...lines[lineIdx], words };
           return { lines };
         }),
+      setWordFontSize: (lineIdx, wordIdx, fontSize) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], fontSize };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordFontFamily: (lineIdx, wordIdx, fontFamily) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], fontFamily };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordFontWeight: (lineIdx, wordIdx, fontWeight) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], fontWeight };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordTextDecoration: (lineIdx, wordIdx, textDecoration) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], textDecoration };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordTextTransform: (lineIdx, wordIdx, textTransform) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], textTransform };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordLetterSpacing: (lineIdx, wordIdx, letterSpacing) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], letterSpacing };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordTextColor: (lineIdx, wordIdx, textColor) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], textColor };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordSpaceAfter: (lineIdx, wordIdx, spaceAfter) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], spaceAfter };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
     }),
     {
-      name: "caption-store-v1",
+      name: "caption-store-v2",
       partialize: (state) => ({
         lines: state.lines,
         currentLine: state.currentLine,

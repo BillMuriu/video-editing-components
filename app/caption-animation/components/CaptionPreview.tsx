@@ -82,7 +82,48 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
     },
   };
 
-  // Fullscreen mode (existing functionality)
+  // Function to create comprehensive word style
+  const createWordStyle = (word: any): React.CSSProperties => {
+    const style: React.CSSProperties = {
+      fontSize: word.fontSize ? `${word.fontSize}px` : "48px",
+      fontFamily: word.fontFamily || "Inter",
+      fontWeight: word.fontWeight || "700",
+      textDecoration: word.textDecoration || "none",
+      textTransform: word.textTransform || "none",
+      letterSpacing: word.letterSpacing ? `${word.letterSpacing}px` : "0px",
+    };
+
+    // Handle effects
+    if (word.effect === "bold") {
+      style.fontWeight = "bold";
+    }
+    if (word.effect === "italic") {
+      style.fontStyle = "italic";
+    }
+    if (word.effect === "gradient") {
+      const type = word.effectOptions?.type || "linear";
+      const from = word.effectOptions?.from || "#ff0080";
+      const to = word.effectOptions?.to || "#7928ca";
+      const angle = word.effectOptions?.angle || 90;
+
+      if (type === "linear") {
+        style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
+      } else {
+        style.background = `radial-gradient(circle, ${from}, ${to})`;
+      }
+      style.backgroundClip = "text";
+      style.WebkitBackgroundClip = "text";
+      style.color = "transparent";
+      style.WebkitTextFillColor = "transparent";
+    } else {
+      // Only apply text color if not using gradient effect
+      style.color = word.textColor || "#1f2937";
+    }
+
+    return style;
+  };
+
+  // Fullscreen mode
   if (fullscreen) {
     return (
       <div
@@ -98,42 +139,36 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
         {line && (
           <div
             key={effectiveCurrentLine}
-            className="text-3xl font-bold text-gray-900 text-center px-4 flex flex-wrap gap-2 items-center justify-center w-full h-full"
+            className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
             style={{ position: "relative", width: "100%" }}
           >
             {line.words?.map((word, widx) => {
               const delay = line.words
                 .slice(0, widx)
                 .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-              const style: React.CSSProperties = {};
-              if (word.effect === "bold") style.fontWeight = "bold";
-              if (word.effect === "italic") style.fontStyle = "italic";
-              if (word.effect === "gradient") {
-                const type = word.effectOptions?.type || "linear";
-                const from = word.effectOptions?.from || "#ff0080";
-                const to = word.effectOptions?.to || "#7928ca";
-                const angle = word.effectOptions?.angle || 90;
-                if (type === "linear") {
-                  style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
-                } else {
-                  style.background = `radial-gradient(circle, ${from}, ${to})`;
-                }
-                style.backgroundClip = "text";
-                style.WebkitBackgroundClip = "text";
-                style.color = "transparent";
-                style.WebkitTextFillColor = "transparent";
-              }
+              const wordStyle = createWordStyle(word);
+
               return (
-                <motion.span
-                  key={widx}
-                  initial={variants[word.animation ?? "fade"].initial}
-                  animate={variants[word.animation ?? "fade"].animate}
-                  transition={{ duration: word.duration ?? 0.5, delay }}
-                  className="inline-block"
-                  style={style}
-                >
-                  {word.text}
-                </motion.span>
+                <React.Fragment key={widx}>
+                  <motion.span
+                    initial={variants[word.animation ?? "fade"].initial}
+                    animate={variants[word.animation ?? "fade"].animate}
+                    transition={{ duration: word.duration ?? 0.5, delay }}
+                    className="inline-block"
+                    style={wordStyle}
+                  >
+                    {word.text}
+                  </motion.span>
+                  {/* Add spacing after the word (except for the last word) */}
+                  {widx < line.words.length - 1 && (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: `${word.spaceAfter ?? 8}px`,
+                      }}
+                    />
+                  )}
+                </React.Fragment>
               );
             })}
           </div>
@@ -142,7 +177,7 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
     );
   }
 
-  // Full dimension mode (new functionality)
+  // Full dimension mode
   if (showFullDimension) {
     return (
       <div className="flex flex-col items-center w-full">
@@ -163,42 +198,36 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
           {line && (
             <div
               key={effectiveCurrentLine}
-              className="text-3xl font-bold text-gray-900 text-center px-4 flex flex-wrap gap-2 items-center justify-center w-full h-full"
+              className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
               style={{ position: "relative", width: "100%" }}
             >
               {line.words?.map((word, widx) => {
                 const delay = line.words
                   .slice(0, widx)
                   .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-                const style: React.CSSProperties = {};
-                if (word.effect === "bold") style.fontWeight = "bold";
-                if (word.effect === "italic") style.fontStyle = "italic";
-                if (word.effect === "gradient") {
-                  const type = word.effectOptions?.type || "linear";
-                  const from = word.effectOptions?.from || "#ff0080";
-                  const to = word.effectOptions?.to || "#7928ca";
-                  const angle = word.effectOptions?.angle || 90;
-                  if (type === "linear") {
-                    style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
-                  } else {
-                    style.background = `radial-gradient(circle, ${from}, ${to})`;
-                  }
-                  style.backgroundClip = "text";
-                  style.WebkitBackgroundClip = "text";
-                  style.color = "transparent";
-                  style.WebkitTextFillColor = "transparent";
-                }
+                const wordStyle = createWordStyle(word);
+
                 return (
-                  <motion.span
-                    key={widx}
-                    initial={variants[word.animation ?? "fade"].initial}
-                    animate={variants[word.animation ?? "fade"].animate}
-                    transition={{ duration: word.duration ?? 0.5, delay }}
-                    className="inline-block"
-                    style={style}
-                  >
-                    {word.text}
-                  </motion.span>
+                  <React.Fragment key={widx}>
+                    <motion.span
+                      initial={variants[word.animation ?? "fade"].initial}
+                      animate={variants[word.animation ?? "fade"].animate}
+                      transition={{ duration: word.duration ?? 0.5, delay }}
+                      className="inline-block"
+                      style={wordStyle}
+                    >
+                      {word.text}
+                    </motion.span>
+                    {/* Add spacing after the word (except for the last word) */}
+                    {widx < line.words.length - 1 && (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: `${word.spaceAfter ?? 8}px`,
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
@@ -212,7 +241,7 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
     );
   }
 
-  // Default scaled preview mode (existing functionality)
+  // Default scaled preview mode
   const maxWidth = 640;
   const scale = Math.min(1, maxWidth / previewDimensions.width);
 
@@ -252,42 +281,36 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
           {line && (
             <div
               key={effectiveCurrentLine}
-              className="text-3xl font-bold text-gray-900 text-center px-4 flex flex-wrap gap-2 items-center justify-center w-full h-full"
+              className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
               style={{ position: "relative", width: "100%" }}
             >
               {line.words?.map((word, widx) => {
                 const delay = line.words
                   .slice(0, widx)
                   .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-                const style: React.CSSProperties = {};
-                if (word.effect === "bold") style.fontWeight = "bold";
-                if (word.effect === "italic") style.fontStyle = "italic";
-                if (word.effect === "gradient") {
-                  const type = word.effectOptions?.type || "linear";
-                  const from = word.effectOptions?.from || "#ff0080";
-                  const to = word.effectOptions?.to || "#7928ca";
-                  const angle = word.effectOptions?.angle || 90;
-                  if (type === "linear") {
-                    style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
-                  } else {
-                    style.background = `radial-gradient(circle, ${from}, ${to})`;
-                  }
-                  style.backgroundClip = "text";
-                  style.WebkitBackgroundClip = "text";
-                  style.color = "transparent";
-                  style.WebkitTextFillColor = "transparent";
-                }
+                const wordStyle = createWordStyle(word);
+
                 return (
-                  <motion.span
-                    key={widx}
-                    initial={variants[word.animation ?? "fade"].initial}
-                    animate={variants[word.animation ?? "fade"].animate}
-                    transition={{ duration: word.duration ?? 0.5, delay }}
-                    className="inline-block"
-                    style={style}
-                  >
-                    {word.text}
-                  </motion.span>
+                  <React.Fragment key={widx}>
+                    <motion.span
+                      initial={variants[word.animation ?? "fade"].initial}
+                      animate={variants[word.animation ?? "fade"].animate}
+                      transition={{ duration: word.duration ?? 0.5, delay }}
+                      className="inline-block"
+                      style={wordStyle}
+                    >
+                      {word.text}
+                    </motion.span>
+                    {/* Add spacing after the word (except for the last word) */}
+                    {widx < line.words.length - 1 && (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: `${word.spaceAfter ?? 8}px`,
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
