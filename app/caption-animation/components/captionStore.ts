@@ -41,11 +41,19 @@ interface BackgroundSettings {
   options?: BackgroundOptions;
 }
 
+interface PreviewDimensions {
+  aspect: "16:9" | "4:3" | "1:1" | "9:16" | "custom";
+  width: number;
+  height: number;
+}
+
 interface CaptionState {
   lines: CaptionLine[];
   currentLine: number;
   animationTypes: string[];
   background: BackgroundSettings;
+  previewDimensions: PreviewDimensions;
+  setPreviewDimensions: (dims: PreviewDimensions) => void;
   setBackground: (bg: BackgroundSettings) => void;
   setLines: (lines: CaptionLine[]) => void;
   setCurrentLine: (idx: number) => void;
@@ -85,6 +93,8 @@ export const useCaptionStore = create<CaptionState>(
       currentLine: 0,
       animationTypes: ["fade", "slide", "bounce"],
       background: { type: "none", options: {} },
+      previewDimensions: { aspect: "16:9", width: 1280, height: 720 },
+      setPreviewDimensions: (dims) => set({ previewDimensions: dims }),
       setBackground: (bg) => set({ background: bg }),
       setLines: (lines) => set({ lines }),
       setCurrentLine: (idx) => set({ currentLine: idx }),
@@ -128,6 +138,7 @@ export const useCaptionStore = create<CaptionState>(
         lines: state.lines,
         currentLine: state.currentLine,
         background: state.background,
+        previewDimensions: state.previewDimensions,
       }),
     }
   )
