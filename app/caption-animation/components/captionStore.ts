@@ -1,12 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type EffectOptions = {
+  type?: string;
+  from?: string;
+  to?: string;
+  angle?: number;
+};
+
 export type CaptionWord = {
   text: string;
   animation?: string;
   duration?: number;
   effect?: string;
-  effectOptions?: Record<string, any>;
+  effectOptions?: EffectOptions;
 };
 
 export type CaptionLine = {
@@ -14,10 +21,32 @@ export type CaptionLine = {
   words: CaptionWord[];
 };
 
+export type BackgroundOptions = {
+  // For grid
+  color?: string;
+  size?: number;
+  // For dots
+  dotColor?: string;
+  dotSize?: number;
+  spacing?: number;
+  // For gradient
+  from?: string;
+  to?: string;
+  angle?: number;
+  type?: string;
+};
+
+interface BackgroundSettings {
+  type: "none" | "grid" | "dots" | "gradient";
+  options?: BackgroundOptions;
+}
+
 interface CaptionState {
   lines: CaptionLine[];
   currentLine: number;
   animationTypes: string[];
+  background: BackgroundSettings;
+  setBackground: (bg: BackgroundSettings) => void;
   setLines: (lines: CaptionLine[]) => void;
   setCurrentLine: (idx: number) => void;
   setWordAnimation: (
@@ -26,20 +55,18 @@ interface CaptionState {
     animation: string
   ) => void;
   setWordDuration: (lineIdx: number, wordIdx: number, duration: number) => void;
-  setWordEffect: (
-    lineIdx: number,
-    wordIdx: number,
-    effect: string
-  ) => void;
+  setWordEffect: (lineIdx: number, wordIdx: number, effect: string) => void;
   setWordEffectOptions: (
     lineIdx: number,
     wordIdx: number,
-    options: Record<string, any>
+    options: EffectOptions
   ) => void;
 }
 
 function splitWords(text: string): CaptionWord[] {
-  return text.split(/\s+/).map((w) => ({ text: w, duration: 0.5, effect: "none" }));
+  return text
+    .split(/\s+/)
+    .map((w) => ({ text: w, duration: 0.5, effect: "none" }));
 }
 
 export const useCaptionStore = create<CaptionState>(
@@ -57,6 +84,8 @@ export const useCaptionStore = create<CaptionState>(
       ],
       currentLine: 0,
       animationTypes: ["fade", "slide", "bounce"],
+      background: { type: "none", options: {} },
+      setBackground: (bg) => set({ background: bg }),
       setLines: (lines) => set({ lines }),
       setCurrentLine: (idx) => set({ currentLine: idx }),
       // No line-level animation/duration/exit
@@ -98,6 +127,7 @@ export const useCaptionStore = create<CaptionState>(
       partialize: (state) => ({
         lines: state.lines,
         currentLine: state.currentLine,
+        background: state.background,
       }),
     }
   )

@@ -13,6 +13,8 @@ export const CaptionEditor = () => {
     setWordDuration,
     setWordEffect,
     setWordEffectOptions,
+    background,
+    setBackground,
   } = useCaptionStore();
 
   const [input, setInput] = useState(lines.map((l) => l.text).join("\n"));
@@ -43,6 +45,163 @@ export const CaptionEditor = () => {
 
   return (
     <div>
+      <h2 className="font-bold mb-2">Background</h2>
+      <div className="mb-4 flex flex-wrap items-center gap-2 p-2 border rounded bg-gray-50">
+        <label className="font-semibold mr-2">Type:</label>
+        <select
+          value={background.type}
+          onChange={(e) =>
+            setBackground({ ...background, type: e.target.value as any })
+          }
+          className="text-xs border rounded px-2 py-1"
+        >
+          <option value="none">None</option>
+          <option value="grid">Grid</option>
+          <option value="dots">Dots</option>
+          <option value="gradient">Gradient</option>
+        </select>
+        {/* Grid options */}
+        {background.type === "grid" && (
+          <>
+            <label className="ml-2 text-xs">Color:</label>
+            <input
+              type="color"
+              value={background.options?.color || "#e5e7eb"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, color: e.target.value },
+                })
+              }
+            />
+            <label className="ml-2 text-xs">Size:</label>
+            <input
+              type="number"
+              min={8}
+              max={64}
+              value={background.options?.size ?? 24}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: {
+                    ...background.options,
+                    size: Number(e.target.value),
+                  },
+                })
+              }
+              className="w-14 text-xs border rounded px-1"
+            />
+          </>
+        )}
+        {/* Dots options */}
+        {background.type === "dots" && (
+          <>
+            <label className="ml-2 text-xs">Dot Color:</label>
+            <input
+              type="color"
+              value={background.options?.dotColor || "#d1d5db"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, dotColor: e.target.value },
+                })
+              }
+            />
+            <label className="ml-2 text-xs">Dot Size:</label>
+            <input
+              type="number"
+              min={2}
+              max={16}
+              value={background.options?.dotSize ?? 4}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: {
+                    ...background.options,
+                    dotSize: Number(e.target.value),
+                  },
+                })
+              }
+              className="w-12 text-xs border rounded px-1"
+            />
+            <label className="ml-2 text-xs">Spacing:</label>
+            <input
+              type="number"
+              min={8}
+              max={64}
+              value={background.options?.spacing ?? 24}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: {
+                    ...background.options,
+                    spacing: Number(e.target.value),
+                  },
+                })
+              }
+              className="w-14 text-xs border rounded px-1"
+            />
+          </>
+        )}
+        {/* Gradient options */}
+        {background.type === "gradient" && (
+          <>
+            <label className="ml-2 text-xs">From:</label>
+            <input
+              type="color"
+              value={background.options?.from || "#ff0080"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, from: e.target.value },
+                })
+              }
+            />
+            <label className="ml-2 text-xs">To:</label>
+            <input
+              type="color"
+              value={background.options?.to || "#7928ca"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, to: e.target.value },
+                })
+              }
+            />
+            <label className="ml-2 text-xs">Angle:</label>
+            <input
+              type="number"
+              min={0}
+              max={360}
+              value={background.options?.angle ?? 90}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: {
+                    ...background.options,
+                    angle: Number(e.target.value),
+                  },
+                })
+              }
+              className="w-12 text-xs border rounded px-1"
+            />
+            <label className="ml-2 text-xs">Type:</label>
+            <select
+              value={background.options?.type || "linear"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, type: e.target.value },
+                })
+              }
+              className="text-xs border rounded px-1"
+            >
+              <option value="linear">Linear</option>
+              <option value="radial">Radial</option>
+            </select>
+          </>
+        )}
+      </div>
       <h2 className="font-bold mb-2">Caption Lines</h2>
       <textarea
         className="w-full border rounded p-2 mb-4"
@@ -87,7 +246,7 @@ export const CaptionEditor = () => {
                 />
                 <select
                   value={word.effect || "none"}
-                  onChange={e => setWordEffect(idx, widx, e.target.value)}
+                  onChange={(e) => setWordEffect(idx, widx, e.target.value)}
                   className="text-xs ml-1"
                   title="Effect"
                 >
@@ -101,7 +260,12 @@ export const CaptionEditor = () => {
                   <span className="flex items-center gap-1 ml-1">
                     <select
                       value={word.effectOptions?.type || "linear"}
-                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, type: e.target.value })}
+                      onChange={(e) =>
+                        setWordEffectOptions(idx, widx, {
+                          ...word.effectOptions,
+                          type: e.target.value,
+                        })
+                      }
                       className="text-xs"
                       title="Gradient Type"
                     >
@@ -111,23 +275,39 @@ export const CaptionEditor = () => {
                     <input
                       type="color"
                       value={word.effectOptions?.from || "#ff0080"}
-                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, from: e.target.value })}
+                      onChange={(e) =>
+                        setWordEffectOptions(idx, widx, {
+                          ...word.effectOptions,
+                          from: e.target.value,
+                        })
+                      }
                       title="From Color"
                     />
                     <input
                       type="color"
                       value={word.effectOptions?.to || "#7928ca"}
-                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, to: e.target.value })}
+                      onChange={(e) =>
+                        setWordEffectOptions(idx, widx, {
+                          ...word.effectOptions,
+                          to: e.target.value,
+                        })
+                      }
                       title="To Color"
                     />
-                    {(!word.effectOptions?.type || word.effectOptions?.type === "linear") && (
+                    {(!word.effectOptions?.type ||
+                      word.effectOptions?.type === "linear") && (
                       <input
                         type="number"
                         min={0}
                         max={360}
                         step={1}
                         value={word.effectOptions?.angle ?? 90}
-                        onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, angle: Number(e.target.value) })}
+                        onChange={(e) =>
+                          setWordEffectOptions(idx, widx, {
+                            ...word.effectOptions,
+                            angle: Number(e.target.value),
+                          })
+                        }
                         className="w-12 text-xs border rounded px-1"
                         placeholder="Angle"
                         title="Angle (deg)"
