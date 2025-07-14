@@ -144,10 +144,27 @@ export const CaptionEditor = () => {
           className="text-xs border rounded px-2 py-1"
         >
           <option value="none">None</option>
+          <option value="color">Color</option>
           <option value="grid">Grid</option>
           <option value="dots">Dots</option>
           <option value="gradient">Gradient</option>
         </select>
+        {background.type === "color" && (
+          <>
+            <label className="ml-2 text-xs">Background Color:</label>
+            <input
+              type="color"
+              value={background.options?.color || "#ffffff"}
+              onChange={(e) =>
+                setBackground({
+                  ...background,
+                  options: { ...background.options, color: e.target.value },
+                })
+              }
+              className="w-8 h-8 border rounded"
+            />
+          </>
+        )}
 
         {background.type === "grid" && (
           <>
@@ -359,6 +376,7 @@ export const CaptionEditor = () => {
                         <option value="bold">Bold</option>
                         <option value="italic">Italic</option>
                         <option value="gradient">Gradient</option>
+                        <option value="blur">Blur In</option>
                       </select>
 
                       {/* Gradient effect options */}
@@ -422,6 +440,58 @@ export const CaptionEditor = () => {
                               title="Angle (deg)"
                             />
                           )}
+                        </div>
+                      )}
+
+                      {/* Blur effect options */}
+                      {word.effect === "blur" && (
+                        <div className="flex items-center gap-1">
+                          <select
+                            value={word.effectOptions?.direction || "top"}
+                            onChange={(e) =>
+                              setWordEffectOptions(idx, widx, {
+                                ...word.effectOptions,
+                                direction: e.target.value,
+                              })
+                            }
+                            className="text-xs border rounded px-1"
+                            title="Blur Direction"
+                          >
+                            <option value="top">From Top</option>
+                            <option value="bottom">From Bottom</option>
+                          </select>
+                          <input
+                            type="number"
+                            min={5}
+                            max={20}
+                            step={1}
+                            value={word.effectOptions?.blurIntensity ?? 10}
+                            onChange={(e) =>
+                              setWordEffectOptions(idx, widx, {
+                                ...word.effectOptions,
+                                blurIntensity: Number(e.target.value),
+                              })
+                            }
+                            className="w-12 text-xs border rounded px-1"
+                            placeholder="Blur"
+                            title="Blur Intensity (px)"
+                          />
+                          <input
+                            type="number"
+                            min={1}
+                            max={5}
+                            step={1}
+                            value={word.effectOptions?.steps ?? 2}
+                            onChange={(e) =>
+                              setWordEffectOptions(idx, widx, {
+                                ...word.effectOptions,
+                                steps: Number(e.target.value),
+                              })
+                            }
+                            className="w-12 text-xs border rounded px-1"
+                            placeholder="Steps"
+                            title="Animation Steps"
+                          />
                         </div>
                       )}
                     </div>

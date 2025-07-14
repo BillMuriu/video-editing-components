@@ -6,6 +6,9 @@ export type EffectOptions = {
   from?: string;
   to?: string;
   angle?: number;
+  direction?: "top" | "bottom";
+  blurIntensity?: number;
+  steps?: number;
 };
 
 export type CaptionWord = {
@@ -59,6 +62,7 @@ interface CaptionState {
   lines: CaptionLine[];
   currentLine: number;
   animationTypes: string[];
+  effectTypes: string[];
   fontFamilies: string[];
   fontWeights: string[];
   textDecorations: string[];
@@ -147,6 +151,86 @@ export const useCaptionStore = create<CaptionState>(
       ],
       currentLine: 0,
       animationTypes: ["fade", "slide", "bounce"],
+      effectTypes: [
+        "none",
+        "shadow",
+        "glow",
+        "outline",
+        "gradient",
+        "blur",
+        "neon",
+        "emboss",
+        "stroke",
+        "highlight",
+        "underline-animated",
+        "rainbow",
+        "glitch",
+        "typewriter",
+        "fade-in",
+        "slide-up",
+        "slide-down",
+        "slide-left",
+        "slide-right",
+        "zoom-in",
+        "zoom-out",
+        "rotate",
+        "flip",
+        "bounce-in",
+        "elastic",
+        "pulse",
+        "shake",
+        "wobble",
+        "flash",
+        "rubberBand",
+        "swing",
+        "tada",
+        "jello",
+        "heartBeat",
+        "backInUp",
+        "backInDown",
+        "backInLeft",
+        "backInRight",
+        "bounceIn",
+        "bounceInDown",
+        "bounceInLeft",
+        "bounceInRight",
+        "bounceInUp",
+        "fadeIn",
+        "fadeInDown",
+        "fadeInDownBig",
+        "fadeInLeft",
+        "fadeInLeftBig",
+        "fadeInRight",
+        "fadeInRightBig",
+        "fadeInUp",
+        "fadeInUpBig",
+        "fadeInTopLeft",
+        "fadeInTopRight",
+        "fadeInBottomLeft",
+        "fadeInBottomRight",
+        "flip",
+        "flipInX",
+        "flipInY",
+        "lightSpeedIn",
+        "lightSpeedInRight",
+        "lightSpeedInLeft",
+        "rotateIn",
+        "rotateInDownLeft",
+        "rotateInDownRight",
+        "rotateInUpLeft",
+        "rotateInUpRight",
+        "jackInTheBox",
+        "rollIn",
+        "zoomIn",
+        "zoomInDown",
+        "zoomInLeft",
+        "zoomInRight",
+        "zoomInUp",
+        "slideInDown",
+        "slideInLeft",
+        "slideInRight",
+        "slideInUp",
+      ],
       fontFamilies: [
         "Inter",
         "Arial",

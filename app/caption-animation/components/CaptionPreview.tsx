@@ -29,7 +29,9 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
 
   // Compute background style
   const bgStyle: React.CSSProperties = {};
-  if (background.type === "gradient") {
+  if (background.type === "color") {
+    bgStyle.background = background.options?.color || "#fff";
+  } else if (background.type === "gradient") {
     const from = background.options?.from || "#ff0080";
     const to = background.options?.to || "#7928ca";
     const angle = background.options?.angle ?? 90;
@@ -80,6 +82,23 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
       },
       exit: { scale: 0.8, opacity: 0 },
     },
+    blur: {
+      initial: (direction: string, blurIntensity: number) => ({
+        filter: `blur(${blurIntensity}px)`,
+        opacity: 0,
+        y: direction === "top" ? -50 : 50,
+      }),
+      animate: (steps: number, blurIntensity: number) => ({
+        filter: [
+          `blur(${blurIntensity}px)`,
+          `blur(${blurIntensity / 2}px)`,
+          "blur(0px)",
+        ],
+        opacity: [0, 0.5, 1],
+        y: [null, 5, 0],
+      }),
+      exit: { filter: "blur(10px)", opacity: 0 },
+    },
   };
 
   // Function to create comprehensive word style
@@ -123,6 +142,72 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
     return style;
   };
 
+  // Helper function to render words with animation logic
+  const renderWords = (words: any[]) => {
+    return words?.map((word, widx) => {
+      const delay = words
+        .slice(0, widx)
+        .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
+      const wordStyle = createWordStyle(word);
+
+      // Handle blur animation
+      if (word.animation === "blur" || word.effect === "blur") {
+        const direction = word.effectOptions?.direction || "top";
+        const blurIntensity = word.effectOptions?.blurIntensity || 10;
+        const steps = word.effectOptions?.steps || 2;
+
+        return (
+          <React.Fragment key={widx}>
+            <motion.span
+              initial={variants.blur.initial(direction, blurIntensity)}
+              animate={variants.blur.animate(steps, blurIntensity)}
+              transition={{
+                duration: word.duration ?? 0.5,
+                delay,
+                times: [0, 0.6, 1],
+              }}
+              className="inline-block will-change-[transform,filter,opacity]"
+              style={wordStyle}
+            >
+              {word.text}
+            </motion.span>
+            {widx < words.length - 1 && (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: `${word.spaceAfter ?? 8}px`,
+                }}
+              />
+            )}
+          </React.Fragment>
+        );
+      }
+
+      // Original rendering for other animations
+      return (
+        <React.Fragment key={widx}>
+          <motion.span
+            initial={variants[word.animation ?? "fade"].initial}
+            animate={variants[word.animation ?? "fade"].animate}
+            transition={{ duration: word.duration ?? 0.5, delay }}
+            className="inline-block"
+            style={wordStyle}
+          >
+            {word.text}
+          </motion.span>
+          {widx < words.length - 1 && (
+            <span
+              style={{
+                display: "inline-block",
+                width: `${word.spaceAfter ?? 8}px`,
+              }}
+            />
+          )}
+        </React.Fragment>
+      );
+    });
+  };
+
   // Fullscreen mode
   if (fullscreen) {
     return (
@@ -142,35 +227,7 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
             className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
             style={{ position: "relative", width: "100%" }}
           >
-            {line.words?.map((word, widx) => {
-              const delay = line.words
-                .slice(0, widx)
-                .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-              const wordStyle = createWordStyle(word);
-
-              return (
-                <React.Fragment key={widx}>
-                  <motion.span
-                    initial={variants[word.animation ?? "fade"].initial}
-                    animate={variants[word.animation ?? "fade"].animate}
-                    transition={{ duration: word.duration ?? 0.5, delay }}
-                    className="inline-block"
-                    style={wordStyle}
-                  >
-                    {word.text}
-                  </motion.span>
-                  {/* Add spacing after the word (except for the last word) */}
-                  {widx < line.words.length - 1 && (
-                    <span
-                      style={{
-                        display: "inline-block",
-                        width: `${word.spaceAfter ?? 8}px`,
-                      }}
-                    />
-                  )}
-                </React.Fragment>
-              );
-            })}
+            {renderWords(line.words)}
           </div>
         )}
       </div>
@@ -201,35 +258,7 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
               className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
               style={{ position: "relative", width: "100%" }}
             >
-              {line.words?.map((word, widx) => {
-                const delay = line.words
-                  .slice(0, widx)
-                  .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-                const wordStyle = createWordStyle(word);
-
-                return (
-                  <React.Fragment key={widx}>
-                    <motion.span
-                      initial={variants[word.animation ?? "fade"].initial}
-                      animate={variants[word.animation ?? "fade"].animate}
-                      transition={{ duration: word.duration ?? 0.5, delay }}
-                      className="inline-block"
-                      style={wordStyle}
-                    >
-                      {word.text}
-                    </motion.span>
-                    {/* Add spacing after the word (except for the last word) */}
-                    {widx < line.words.length - 1 && (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: `${word.spaceAfter ?? 8}px`,
-                        }}
-                      />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+              {renderWords(line.words)}
             </div>
           )}
         </div>
@@ -284,35 +313,7 @@ export const CaptionPreview: React.FC<CaptionPreviewProps> = ({
               className="text-center px-4 flex flex-wrap items-center justify-center w-full h-full"
               style={{ position: "relative", width: "100%" }}
             >
-              {line.words?.map((word, widx) => {
-                const delay = line.words
-                  .slice(0, widx)
-                  .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
-                const wordStyle = createWordStyle(word);
-
-                return (
-                  <React.Fragment key={widx}>
-                    <motion.span
-                      initial={variants[word.animation ?? "fade"].initial}
-                      animate={variants[word.animation ?? "fade"].animate}
-                      transition={{ duration: word.duration ?? 0.5, delay }}
-                      className="inline-block"
-                      style={wordStyle}
-                    >
-                      {word.text}
-                    </motion.span>
-                    {/* Add spacing after the word (except for the last word) */}
-                    {widx < line.words.length - 1 && (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: `${word.spaceAfter ?? 8}px`,
-                        }}
-                      />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+              {renderWords(line.words)}
             </div>
           )}
         </div>
