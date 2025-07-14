@@ -15,6 +15,8 @@ import {
   Reply,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import BlurText from "./components/Blurtext";
+import { useCaptionSequenceStore } from "./components/captionSequenceStore";
 
 const InThisVideo = () => {
   // Zustand store for persistent control panel state
@@ -56,12 +58,9 @@ const InThisVideo = () => {
   }, [zoomed]);
 
   useEffect(() => {
-    const timeout = setTimeout(
-      () => setZoomed(true),
-      entranceDelay * 1000 + 2000
-    ); // base 2s + entranceDelay
+    const timeout = setTimeout(() => setZoomed(true), 500);
     return () => clearTimeout(timeout);
-  }, [entranceDelay]);
+  }, []);
 
   return (
     <>
@@ -100,24 +99,17 @@ const InThisVideo = () => {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className={
               zoomed
-                ? "w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg z-20"
-                : "w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg"
+                ? "w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg z-20 flex items-center justify-center"
+                : "w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg flex items-center justify-center"
             }
             style={{}}
           >
-            <iframe
-              src={iframeLink}
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="w-full h-full border-0 rounded-lg"
-              style={{ background: "black" }}
-            />
+            <SequentialBlurText />
           </motion.div>
 
           {/* CONTENT CONTAINER - Light gray background for all content below video */}
           <motion.div
-            animate={zoomed ? { opacity: 0, y: 40 } : { opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeInOut" }}
           >
             {/* LAYER 2: VIDEO TITLE */}
@@ -340,4 +332,35 @@ const InThisVideo = () => {
   );
 };
 
+// --- SequentialBlurText Component ---
+function SequentialBlurText() {
+  const { captions, currentIndex, nextCaption } = useCaptionSequenceStore();
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    if (currentIndex >= captions.length) return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      nextCaption();
+    }, captions[currentIndex].duration);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [currentIndex, captions, nextCaption]);
+
+  if (currentIndex >= captions.length) return null;
+  return (
+    <BlurText
+      text={captions[currentIndex].text}
+      delay={30}
+      animateBy="letters"
+      direction="bottom"
+      className="text-7xl mb-8 text-white"
+    />
+  );
+}
 export default InThisVideo;
