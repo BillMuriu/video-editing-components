@@ -5,6 +5,8 @@ export type CaptionWord = {
   text: string;
   animation?: string;
   duration?: number;
+  effect?: string;
+  effectOptions?: Record<string, any>;
 };
 
 export type CaptionLine = {
@@ -24,10 +26,20 @@ interface CaptionState {
     animation: string
   ) => void;
   setWordDuration: (lineIdx: number, wordIdx: number, duration: number) => void;
+  setWordEffect: (
+    lineIdx: number,
+    wordIdx: number,
+    effect: string
+  ) => void;
+  setWordEffectOptions: (
+    lineIdx: number,
+    wordIdx: number,
+    options: Record<string, any>
+  ) => void;
 }
 
 function splitWords(text: string): CaptionWord[] {
-  return text.split(/\s+/).map((w) => ({ text: w }));
+  return text.split(/\s+/).map((w) => ({ text: w, duration: 0.5, effect: "none" }));
 }
 
 export const useCaptionStore = create<CaptionState>(
@@ -61,6 +73,22 @@ export const useCaptionStore = create<CaptionState>(
           const lines = [...state.lines];
           const words = [...lines[lineIdx].words];
           words[wordIdx] = { ...words[wordIdx], duration };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordEffect: (lineIdx, wordIdx, effect) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], effect };
+          lines[lineIdx] = { ...lines[lineIdx], words };
+          return { lines };
+        }),
+      setWordEffectOptions: (lineIdx, wordIdx, options) =>
+        set((state) => {
+          const lines = [...state.lines];
+          const words = [...lines[lineIdx].words];
+          words[wordIdx] = { ...words[wordIdx], effectOptions: options };
           lines[lineIdx] = { ...lines[lineIdx], words };
           return { lines };
         }),

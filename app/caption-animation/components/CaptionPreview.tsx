@@ -39,18 +39,37 @@ export const CaptionPreview = () => {
             style={{ position: "absolute", width: "100%" }}
           >
             {line.words?.map((word, widx) => {
-              // Calculate delay as the sum of durations of previous words
+              // Each word's delay is the sum of all previous word durations
               const delay = line.words
                 .slice(0, widx)
-                .reduce((acc, w) => acc + (w.duration ?? 0), 0);
+                .reduce((acc, w) => acc + (w.duration ?? 0.5), 0);
+              let style: React.CSSProperties = {};
+              if (word.effect === "bold") style.fontWeight = "bold";
+              if (word.effect === "italic") style.fontStyle = "italic";
+              if (word.effect === "gradient") {
+                const type = word.effectOptions?.type || "linear";
+                const from = word.effectOptions?.from || "#ff0080";
+                const to = word.effectOptions?.to || "#7928ca";
+                const angle = word.effectOptions?.angle || 90;
+                if (type === "linear") {
+                  style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
+                } else {
+                  style.background = `radial-gradient(circle, ${from}, ${to})`;
+                }
+                style.backgroundClip = "text";
+                style.WebkitBackgroundClip = "text";
+                style.color = "transparent";
+                style.WebkitTextFillColor = "transparent";
+              }
               return (
                 <motion.span
                   key={widx}
-                  initial={variants[word.animation]?.initial || {}}
-                  animate={variants[word.animation]?.animate || {}}
-                  exit={variants[word.animation]?.exit || {}}
+                  initial={variants[word.animation ?? "fade"].initial}
+                  animate={variants[word.animation ?? "fade"].animate}
+                  exit={variants[word.animation ?? "fade"].exit}
                   transition={{ duration: word.duration ?? 0.5, delay }}
                   className="inline-block"
+                  style={style}
                 >
                   {word.text}
                 </motion.span>

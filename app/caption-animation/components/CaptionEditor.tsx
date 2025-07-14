@@ -11,6 +11,8 @@ export const CaptionEditor = () => {
     animationTypes,
     setWordAnimation,
     setWordDuration,
+    setWordEffect,
+    setWordEffectOptions,
   } = useCaptionStore();
 
   const [input, setInput] = useState(lines.map((l) => l.text).join("\n"));
@@ -26,9 +28,13 @@ export const CaptionEditor = () => {
         words: text.split(/\s+/).map((w, widx) => {
           const prevAnim = lines[idx]?.words?.[widx]?.animation;
           const prevDuration = lines[idx]?.words?.[widx]?.duration;
-          const wordObj = { text: w };
+          const prevEffect = lines[idx]?.words?.[widx]?.effect;
+          const prevEffectOptions = lines[idx]?.words?.[widx]?.effectOptions;
+          const wordObj: any = { text: w };
           if (prevAnim) wordObj.animation = prevAnim;
           if (prevDuration !== undefined) wordObj.duration = prevDuration;
+          if (prevEffect) wordObj.effect = prevEffect;
+          if (prevEffectOptions) wordObj.effectOptions = prevEffectOptions;
           return wordObj;
         }),
       }))
@@ -79,6 +85,56 @@ export const CaptionEditor = () => {
                   placeholder="s"
                   title="Duration (seconds)"
                 />
+                <select
+                  value={word.effect || "none"}
+                  onChange={e => setWordEffect(idx, widx, e.target.value)}
+                  className="text-xs ml-1"
+                  title="Effect"
+                >
+                  <option value="none">No Effect</option>
+                  <option value="bold">Bold</option>
+                  <option value="italic">Italic</option>
+                  <option value="gradient">Gradient</option>
+                </select>
+                {/* Gradient effect options panel */}
+                {word.effect === "gradient" && (
+                  <span className="flex items-center gap-1 ml-1">
+                    <select
+                      value={word.effectOptions?.type || "linear"}
+                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, type: e.target.value })}
+                      className="text-xs"
+                      title="Gradient Type"
+                    >
+                      <option value="linear">Linear</option>
+                      <option value="radial">Radial</option>
+                    </select>
+                    <input
+                      type="color"
+                      value={word.effectOptions?.from || "#ff0080"}
+                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, from: e.target.value })}
+                      title="From Color"
+                    />
+                    <input
+                      type="color"
+                      value={word.effectOptions?.to || "#7928ca"}
+                      onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, to: e.target.value })}
+                      title="To Color"
+                    />
+                    {(!word.effectOptions?.type || word.effectOptions?.type === "linear") && (
+                      <input
+                        type="number"
+                        min={0}
+                        max={360}
+                        step={1}
+                        value={word.effectOptions?.angle ?? 90}
+                        onChange={e => setWordEffectOptions(idx, widx, { ...word.effectOptions, angle: Number(e.target.value) })}
+                        className="w-12 text-xs border rounded px-1"
+                        placeholder="Angle"
+                        title="Angle (deg)"
+                      />
+                    )}
+                  </span>
+                )}
               </span>
             ))}
           </div>
