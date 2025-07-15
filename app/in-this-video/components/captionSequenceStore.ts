@@ -15,9 +15,13 @@ interface CaptionSequenceState {
 
 export const useCaptionSequenceStore = create<CaptionSequenceState>((set) => ({
   captions: [
-    { text: "In This Video", duration: 1800 },
-    { text: "You'll learn", duration: 1000 },
-    { text: "How to Animate", duration: 100 },
+    { text: "In This Video", duration: 800 },
+    { text: "We're", duration: 200 },
+    { text: "fixing", duration: 200 },
+    { text: "one", duration: 200 },
+    { text: "of", duration: 200 },
+    { text: "the most frustrating", duration: 300 },
+    // { text: "issue", duration: 300 },
   ],
   currentIndex: 0,
   setCaptions: (captions) => set({ captions, currentIndex: 0 }),
